@@ -1,19 +1,15 @@
-package com.ayush.linkup.data.repository
+package com.ayush.linkup.data.repository.impl
 
 import com.ayush.linkup.data.model.User
-import com.ayush.linkup.data.repository.impl.AuthRepository
-import com.ayush.linkup.data.utils.AuthState
+import com.ayush.linkup.data.repository.AuthRepository
+import com.ayush.linkup.data.utils.TaskState
+import com.ayush.linkup.data.utils.toFlow
 import com.ayush.linkup.utils.Constants.ERR
 import com.ayush.linkup.utils.Constants.USER_COLLECTION
 import com.ayush.linkup.utils.State
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,15 +29,15 @@ class AuthRepositoryImpl @Inject constructor(
                 .toFlow()
                 .collect {
                     when (it) {
-                        AuthState.Cancelled -> {
+                        TaskState.Cancelled -> {
                             emit(State.Success(false))
                         }
 
-                        is AuthState.Failure -> {
-                            emit(State.Error(it.message ?: ERR))
+                        is TaskState.Failure -> {
+                            emit(State.Error(it.message))
                         }
 
-                        AuthState.Success -> {
+                        TaskState.Success -> {
                             emit(State.Success(true))
                         }
                     }
@@ -61,36 +57,38 @@ class AuthRepositoryImpl @Inject constructor(
                 .toFlow()
                 .collect {
                     isAuthSuccess = when (it) {
-                        AuthState.Cancelled -> {
+                        TaskState.Cancelled -> {
                             false
                         }
 
-                        is AuthState.Failure -> {
+                        is TaskState.Failure -> {
                             false
                         }
 
-                        AuthState.Success -> {
-
+                        TaskState.Success -> {
                             true
                         }
                     }
                 }
 
             if(isAuthSuccess) {
+                val userId = auth.currentUser?.uid!!
                 firestore.collection(USER_COLLECTION)
-                    .add(user.copy(timestamp = System.currentTimeMillis(), userId = auth.currentUser?.uid!!))
+                    .document(userId)
+                    .set(user.copy(timestamp = System.currentTimeMillis(), userId = userId))
                     .toFlow()
                     .collect {
                         when(it) {
-                            AuthState.Cancelled -> {
+                            TaskState.Cancelled -> {
                                 emit(State.Success(false))
                             }
-                            is AuthState.Failure -> {
+                            is TaskState.Failure -> {
                                 emit(State.Error(it.message))
                             }
-                            AuthState.Success -> {
+                            TaskState.Success -> {
                                 emit(State.Success(true))
                             }
+
                         }
                     }
 
@@ -104,21 +102,5 @@ class AuthRepositoryImpl @Inject constructor(
         auth.signOut()
     }
 
-    private fun <T> Task<T>.toFlow(): Flow<AuthState> = callbackFlow {
-        addOnSuccessListener {
-            trySend(AuthState.Success)
-            close()
-        }
-        addOnFailureListener {
-            trySend(AuthState.Failure(it.message ?: ERR))
-            close()
-        }
-        addOnCanceledListener {
-            trySend(AuthState.Cancelled)
-            close()
-        }
-        awaitClose {
-            this.cancel()
-        }
-    }
+
 }

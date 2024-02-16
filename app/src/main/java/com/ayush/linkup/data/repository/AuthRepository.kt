@@ -1,4 +1,4 @@
-package com.ayush.linkup.data.repository.impl
+package com.ayush.linkup.data.repository
 
 import com.ayush.linkup.data.model.User
 import com.ayush.linkup.utils.State
