@@ -10,5 +10,6 @@ data class User(
     val email: String = "",
     val password: String = "",
     val noOfFriends: Int = 0,
-    val friends: String = ""
+    val friends: String = "",
+    val userName: String = ""
 )

@@ -7,5 +7,6 @@ data class Post(
     val postedBy: String = "",
     val postedAt: Long = 0L,
     val uniqueMediaName: String = "",
-    val downloadUrl: String = ""
+    val downloadUrl: String = "",
+    var isLiked: Boolean = false
 )

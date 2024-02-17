@@ -3,8 +3,12 @@ package com.ayush.linkup.di
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.ayush.linkup.data.repository.impl.AuthRepositoryImpl
 import com.ayush.linkup.data.repository.AuthRepository
+import com.ayush.linkup.data.repository.PostRepository
+import com.ayush.linkup.data.repository.UserRepository
+import com.ayush.linkup.data.repository.impl.AuthRepositoryImpl
+import com.ayush.linkup.data.repository.impl.PostRepositoryImpl
+import com.ayush.linkup.data.repository.impl.UserRepositoryImpl
 import com.ayush.linkup.utils.NetworkObserver
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -38,6 +42,21 @@ object AppModule {
         firestore: FirebaseFirestore,
         auth: FirebaseAuth
     ): AuthRepository = AuthRepositoryImpl(firestore, auth)
+
+    @Provides
+    fun providesPostsRepository(
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth,
+        storage: FirebaseStorage
+    ): PostRepository = PostRepositoryImpl(
+        auth = auth,
+        firestore = firestore,
+        storage = storage
+    )
+
+    @Provides
+    fun providesUserRepository(firestore: FirebaseFirestore): UserRepository =
+        UserRepositoryImpl(firestore = firestore)
 
     @Provides
     @Singleton

@@ -21,6 +21,12 @@ sealed class BtmRoute(
         title = "Search"
     )
 
+    data object AddPostScreen : BtmRoute(
+        route = "add_post",
+        icon = R.drawable.search,
+        title = "Create"
+    )
+
     data object NotificationsScreen : BtmRoute(
         route = "notification",
         icon = R.drawable.notification,

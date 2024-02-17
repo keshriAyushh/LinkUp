@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ayush.linkup.presentation.screen.host.HostScreen
-import com.ayush.linkup.utils.Constants.AUTH_ROUTE
 import com.ayush.linkup.utils.Constants.ROOT_ROUTE
 import com.ayush.linkup.utils.Route
 
@@ -23,7 +22,7 @@ fun AppNavigation() {
         NavHost(
             navController = authNavHostController,
             route = ROOT_ROUTE,
-            startDestination = AUTH_ROUTE
+            startDestination = Route.HostScreen.route
         ) {
             authNavGraph(navController = authNavHostController)
             composable(route = Route.HostScreen.route) {

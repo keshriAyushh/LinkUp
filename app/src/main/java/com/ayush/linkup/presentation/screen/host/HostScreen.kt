@@ -3,12 +3,9 @@ package com.ayush.linkup.presentation.screen.host
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -51,24 +48,6 @@ fun HostScreen() {
                 hostState = snackbarHostState
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    //Open add post screen
-                },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(end = 20.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Post"
-                )
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End,
     ) {
         BottomNavGraph(
             appNavHostController = appNavController,
@@ -82,6 +61,7 @@ fun BottomBar(navController: NavController) {
     val screens = listOf(
         BtmRoute.PostsScreen,
         BtmRoute.SearchScreen,
+        BtmRoute.AddPostScreen,
         BtmRoute.NotificationsScreen,
         BtmRoute.ProfileScreen
     )
@@ -90,7 +70,7 @@ fun BottomBar(navController: NavController) {
     val currentDestination = navBackStackEntry?.destination
 
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
@@ -128,13 +108,20 @@ fun RowScope.AddItem(
             }
         },
         icon = {
-            Icon(
-                painter = painterResource(id = screen.icon),
-                contentDescription = "bottom_bar_icon",
-            )
+            if (screen.title == "Create") {
+                Icon(
+                    imageVector = Icons.Rounded.AddCircle,
+                    contentDescription = "bottom_bar_icon",
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = screen.icon),
+                    contentDescription = "bottom_bar_icon",
+                )
+            }
         },
         colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.secondary,
+            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             unselectedIconColor = Color.White
         ),
         alwaysShowLabel = false
