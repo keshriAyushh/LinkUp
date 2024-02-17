@@ -3,9 +3,10 @@ package com.ayush.linkup.data.repository.impl
 import android.net.Uri
 import com.ayush.linkup.data.model.Post
 import com.ayush.linkup.data.repository.PostRepository
-import com.ayush.linkup.data.utils.TaskState
 import com.ayush.linkup.data.utils.StorageState
+import com.ayush.linkup.data.utils.TaskState
 import com.ayush.linkup.data.utils.toFlow
+import com.ayush.linkup.data.utils.toUriFlow
 import com.ayush.linkup.utils.Constants.ERR
 import com.ayush.linkup.utils.Constants.POST_COLLECTION
 import com.ayush.linkup.utils.State
@@ -63,7 +64,7 @@ class PostRepositoryImpl @Inject constructor(
 
             if (isUploadSuccess) {
                 var downloadUrl: String? = null
-                storageRef.downloadUrl.toFlow().collect {
+                storageRef.downloadUrl.toUriFlow().collect {
                     when (it) {
                         StorageState.Cancelled -> {
                             downloadUrl = null
@@ -85,7 +86,8 @@ class PostRepositoryImpl @Inject constructor(
                             post.copy(
                                 postedAt = System.currentTimeMillis(),
                                 uniqueMediaName = uniqueMediaName,
-                                downloadUrl = downloadUrl!!
+                                downloadUrl = downloadUrl!!,
+                                postedBy = auth.currentUser?.uid!!
                             )
                         )
                         .toFlow()

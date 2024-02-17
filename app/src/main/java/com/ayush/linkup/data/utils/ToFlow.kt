@@ -26,7 +26,7 @@ fun <T> Task<T>.toFlow(): Flow<TaskState> = callbackFlow {
     }
 }
 
-fun Task<Uri>.toFlow(): Flow<StorageState> = callbackFlow {
+fun Task<Uri>.toUriFlow(): Flow<StorageState> = callbackFlow {
     addOnSuccessListener {
         trySend(StorageState.Success(it.toString()))
         close()

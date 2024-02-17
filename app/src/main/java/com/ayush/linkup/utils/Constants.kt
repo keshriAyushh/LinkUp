@@ -7,4 +7,7 @@ object Constants {
     const val AVAILABLE: String = "Back Online!"
     const val UNAVAILABLE: String = "No internet connection!"
     const val LOSING: String = "Poor internet connection!"
+    const val AUTH_ROUTE = "auth"
+    const val APP_ROUTE = "app"
+    const val ROOT_ROUTE = "root"
 }
