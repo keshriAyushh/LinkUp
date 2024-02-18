@@ -1,5 +1,6 @@
 package com.ayush.linkup.presentation.component
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,14 +38,13 @@ import coil.request.ImageRequest
 import com.ayush.linkup.R
 import com.ayush.linkup.data.model.Post
 import com.ayush.linkup.data.model.User
-import com.ayush.linkup.presentation.viewmodels.PostsViewModel
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun PostItem(
     post: Post,
     user: User,
-    viewModel: PostsViewModel
 ) {
     val isLiked = rememberSaveable {
         mutableStateOf(false)

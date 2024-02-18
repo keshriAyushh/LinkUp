@@ -45,25 +45,7 @@ fun PostsScreen(
         viewModel.getAllPosts()
     }
 
-    viewModel.userState.collectAsState().value.let {
-        when (it) {
-            is State.Error -> {
-                scope.launch {
-                    snackbarState
-                        .showSnackbar(
-                            message = it.message,
-                            duration = SnackbarDuration.Short
-                        )
-                }
-            }
 
-            State.Loading -> {}
-            State.None -> {}
-            is State.Success -> {
-                user = it.data
-            }
-        }
-    }
 
     viewModel.allPostsState.collectAsState().value.let {
         when (it) {
@@ -102,15 +84,32 @@ fun PostsScreen(
                             fontFamily = FontFamily(Font(R.font.nunito_bold))
                         )
                     }
-                    items(it.data) { data ->
-                        LaunchedEffect(data) {
-                            viewModel.getUser(data.postedBy)
+                    items(it.data) { post ->
+                        LaunchedEffect(post.postedBy) {
+                            viewModel.getUser(post.postedBy)
                         }
-                        PostItem(
-                            post = data,
-                            user = user,
-                            viewModel = viewModel
-                        )
+                        viewModel.userState.collectAsState().value.let {
+                            when (it) {
+                                is State.Error -> {
+                                    scope.launch {
+                                        snackbarState
+                                            .showSnackbar(
+                                                message = it.message,
+                                                duration = SnackbarDuration.Short
+                                            )
+                                    }
+                                }
+
+                                State.Loading -> {}
+                                State.None -> {}
+                                is State.Success -> {
+                                    PostItem(
+                                        post = post,
+                                        user = it.data
+                                    )
+                                }
+                            }
+                        }
                         Space(10.dp)
                     }
                 }
