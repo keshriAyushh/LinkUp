@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.LinkUp" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="windowSplashScreenAnimationDuration">200</item>
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="postSplashScreenTheme">@style/Theme.LinkUp</item>
+    </style>
 </resources>

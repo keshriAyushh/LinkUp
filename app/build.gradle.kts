@@ -4,6 +4,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     kotlin("kapt")
     id("com.google.gms.google-services")
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -43,7 +44,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packaging {
         resources {
@@ -97,4 +98,21 @@ dependencies {
     //Coil
     implementation("io.coil-kt:coil:2.5.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    //Kotlin serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    //Splash screen api
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    //Exoplayer
+    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+
+    // pager lib
+    implementation("com.google.accompanist:accompanist-pager:0.23.1")
+    // pager indicator
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.23.1")
+    // system ui controller
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
+
 }

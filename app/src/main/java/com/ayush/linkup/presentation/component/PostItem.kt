@@ -1,6 +1,5 @@
 package com.ayush.linkup.presentation.component
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,15 +11,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,17 +49,105 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ayush.linkup.R
 import com.ayush.linkup.data.model.Post
-import com.ayush.linkup.data.model.User
+import com.ayush.linkup.presentation.ui.theme.RED
+import kotlinx.coroutines.launch
 
-
-@SuppressLint("StateFlowValueCalledInComposition")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostItem(
     post: Post,
-    user: User,
+    currentUserId: String?,
+    onDeleteClick: (Post) -> Unit
 ) {
     val isLiked = rememberSaveable {
         mutableStateOf(false)
+    }
+
+    val ctx = LocalContext.current
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    val showBottomSheet = remember { mutableStateOf(false) }
+
+    if (showBottomSheet.value) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet.value = false
+            },
+            sheetState = sheetState
+        ) {
+            Text(
+                text = "Delete Post",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontSize = 20.sp
+            )
+
+            Space(20.dp)
+
+            Text(
+                text = "Are you sure you want to delete your post? ",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontSize = 16.sp
+            )
+
+            Space(10.dp)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(1f)
+                    .padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet.value = false
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Gray,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth(0.5f),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(
+                        text = "Cancel",
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Button(
+                    onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                showBottomSheet.value = false
+                            }
+                        }
+                        onDeleteClick(post)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RED,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth(1f),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(
+                        text = "Delete",
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    )
+                }
+            }
+            Space(50.dp)
+        }
     }
 
     Card(
@@ -73,29 +173,76 @@ fun PostItem(
             Row(
                 modifier = Modifier.fillMaxWidth(1f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(user.pfp)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clip(CircleShape)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = user.name,
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(
+                    modifier = Modifier.wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    if (post.postedByPfp != "") {
+                        AsyncImage(
+                            model = ImageRequest.Builder(ctx)
+                                .data(post.postedByPfp)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.AccountCircle,
+                            contentDescription = "dp",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = post.postedByName,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                if (post.postedBy == currentUserId) {
+                    IconButton(
+                        onClick = {
+                            showBottomSheet.value = true
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.DeleteForever,
+                            contentDescription = "delete_post",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
             }
 
-            Space(10.dp)
+            Space(20.dp)
+
+            if (post.media != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(1f),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    AsyncImage(
+                        model = post.media,
+                        contentDescription = "Post",
+                    )
+                }
+            }
+
+            Space(20.dp)
 
             Text(
                 text = post.text,
@@ -103,6 +250,7 @@ fun PostItem(
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 color = MaterialTheme.colorScheme.onSurface
             )
+
             Space(20.dp)
             Row(
                 modifier = Modifier

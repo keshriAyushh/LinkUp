@@ -8,5 +8,5 @@ interface PostRepository {
     fun addPost(post: Post): Flow<State<Boolean>>
     fun getPost(postId: String): Flow<State<Post>>
     fun getAllPosts(): Flow<State<List<Post>>>
-    fun deletePost(postId: String): Flow<State<Boolean>>
+    fun deletePost(post: Post): Flow<State<Boolean>>
 }

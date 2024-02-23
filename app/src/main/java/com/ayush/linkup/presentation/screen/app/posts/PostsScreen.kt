@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ayush.linkup.R
-import com.ayush.linkup.data.model.User
 import com.ayush.linkup.presentation.LocalSnackbarState
 import com.ayush.linkup.presentation.component.Loading
 import com.ayush.linkup.presentation.component.PostItem
@@ -39,13 +38,34 @@ fun PostsScreen(
     val navigator = LocalAppNavigator.current
     val scope = rememberCoroutineScope()
     val snackbarState = LocalSnackbarState.current
-    var user: User = User()
+    val currentUserId = viewModel.currentUserId
 
     LaunchedEffect(true) {
         viewModel.getAllPosts()
     }
 
+    viewModel.deleteState.collectAsState().value.let {
+        when (it) {
+            is State.Error -> {
+                scope.launch {
+                    snackbarState
+                        .showSnackbar(
+                            message = it.message,
+                            duration = SnackbarDuration.Short
+                        )
+                }
+            }
 
+            State.Loading -> {
+
+            }
+
+            State.None -> {}
+            is State.Success -> {
+
+            }
+        }
+    }
 
     viewModel.allPostsState.collectAsState().value.let {
         when (it) {
@@ -72,7 +92,8 @@ fun PostsScreen(
                     modifier = Modifier
                         .fillMaxSize(1f)
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(10.dp),
+                        .padding(10.dp)
+                        .padding(bottom = 85.dp),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -85,30 +106,8 @@ fun PostsScreen(
                         )
                     }
                     items(it.data) { post ->
-                        LaunchedEffect(post.postedBy) {
-                            viewModel.getUser(post.postedBy)
-                        }
-                        viewModel.userState.collectAsState().value.let {
-                            when (it) {
-                                is State.Error -> {
-                                    scope.launch {
-                                        snackbarState
-                                            .showSnackbar(
-                                                message = it.message,
-                                                duration = SnackbarDuration.Short
-                                            )
-                                    }
-                                }
-
-                                State.Loading -> {}
-                                State.None -> {}
-                                is State.Success -> {
-                                    PostItem(
-                                        post = post,
-                                        user = it.data
-                                    )
-                                }
-                            }
+                        PostItem(post = post, currentUserId = currentUserId) { deletePost ->
+                            viewModel.deletePost(deletePost)
                         }
                         Space(10.dp)
                     }

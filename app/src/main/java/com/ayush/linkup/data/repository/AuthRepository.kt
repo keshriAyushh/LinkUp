@@ -8,5 +8,7 @@ interface AuthRepository {
 
     fun signIn(email: String, password: String): Flow<State<Boolean>>
     fun signUp(user: User): Flow<State<Boolean>>
+    fun isUserSignedIn(): Boolean
     fun signOut()
+    fun forgotPassword(email: String): Flow<State<Boolean>>
 }

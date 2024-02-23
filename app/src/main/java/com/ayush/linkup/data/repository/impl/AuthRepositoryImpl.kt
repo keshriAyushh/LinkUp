@@ -20,6 +20,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth
 ) : AuthRepository {
 
+    override fun isUserSignedIn() = auth.currentUser?.uid != null
+
     override fun signIn(email: String, password: String): Flow<State<Boolean>> = flow {
         try {
             emit(State.None)
@@ -93,6 +95,37 @@ class AuthRepositoryImpl @Inject constructor(
                     }
 
             }
+        } catch (e: Exception) {
+            emit(State.Error(e.message ?: ERR))
+        }
+    }
+
+    override fun forgotPassword(email: String): Flow<State<Boolean>> = flow {
+        try {
+            emit(State.None)
+            emit(State.Loading)
+
+            var isSuccess = false
+
+            auth.sendPasswordResetEmail(email)
+                .toFlow()
+                .collect {
+                    isSuccess = when (it) {
+                        TaskState.Cancelled -> {
+                            false
+                        }
+
+                        is TaskState.Failure -> {
+                            false
+                        }
+
+                        TaskState.Success -> {
+                            true
+                        }
+                    }
+                }
+
+            emit(State.Success(isSuccess))
         } catch (e: Exception) {
             emit(State.Error(e.message ?: ERR))
         }

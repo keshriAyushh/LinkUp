@@ -38,6 +38,10 @@ object AppModule {
     fun providesAuth() = FirebaseAuth.getInstance()
 
     @Provides
+    @Singleton
+    fun providesStorage() = FirebaseStorage.getInstance()
+
+    @Provides
     fun providesAuthRepository(
         firestore: FirebaseFirestore,
         auth: FirebaseAuth
@@ -55,10 +59,7 @@ object AppModule {
     )
 
     @Provides
-    fun providesUserRepository(firestore: FirebaseFirestore): UserRepository =
-        UserRepositoryImpl(firestore = firestore)
+    fun providesUserRepository(firestore: FirebaseFirestore, auth: FirebaseAuth): UserRepository =
+        UserRepositoryImpl(firestore = firestore, auth = auth)
 
-    @Provides
-    @Singleton
-    fun providesStorage() = FirebaseStorage.getInstance()
 }

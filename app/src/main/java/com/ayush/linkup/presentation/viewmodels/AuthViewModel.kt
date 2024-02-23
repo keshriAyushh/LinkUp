@@ -21,6 +21,13 @@ class AuthViewModel @Inject constructor(
     private val _signUpState = MutableStateFlow<State<Boolean>>(State.None)
     val signUpState get() = _signUpState
 
+    var isUserSignedIn: Boolean = false
+
+
+    private val _forgotPasssState = MutableStateFlow<State<Boolean>>(State.None)
+    val forgotPassState get() = _forgotPasssState
+
+
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             authRepository.signIn(email, password)
@@ -39,7 +46,23 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun forgotPassword(email: String) {
+        viewModelScope.launch {
+            authRepository.forgotPassword(email).collect {
+                forgotPassState.value = it
+            }
+        }
+    }
+
+    fun isUserSignedIn() {
+        isUserSignedIn = authRepository.isUserSignedIn()
+    }
+
     fun signOut() {
         authRepository.signOut()
+    }
+
+    init {
+        isUserSignedIn()
     }
 }

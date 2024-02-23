@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.ayush.linkup.presentation.screen.auth.ForgotPassScreen
 import com.ayush.linkup.presentation.screen.auth.LoginScreen
 import com.ayush.linkup.presentation.screen.auth.SignupScreen
 import com.ayush.linkup.utils.Constants.AUTH_ROUTE
@@ -76,6 +77,36 @@ fun NavGraphBuilder.authNavGraph(
             }
         ) {
             LoginScreen()
+        }
+
+        composable(
+            route = Route.ForgotPassScreen.route,
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                    animationSpec = tween(700)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                    animationSpec = tween(700)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                    animationSpec = tween(700)
+                )
+            }
+        ) {
+            ForgotPassScreen()
         }
     }
 }

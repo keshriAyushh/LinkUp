@@ -30,6 +30,16 @@ class PostsViewModel @Inject constructor(
     private val _addPostState = MutableStateFlow<State<Boolean>>(State.None)
     val addPostState get() = _addPostState
 
+    private val _deleteState = MutableStateFlow<State<Boolean>>(State.None)
+    val deleteState get() = _deleteState
+
+    var currentUserId: String? = null
+
+    init {
+        getCurrentUserId()
+    }
+
+
     fun getAllPosts() {
         viewModelScope.launch {
             postsRepository.getAllPosts().collect {
@@ -52,6 +62,18 @@ class PostsViewModel @Inject constructor(
                 _addPostState.value = it
             }
         }
+    }
+
+    fun deletePost(post: Post) {
+        viewModelScope.launch {
+            postsRepository.deletePost(post).collect {
+                _deleteState.value = it
+            }
+        }
+    }
+
+    private fun getCurrentUserId() {
+        currentUserId = userRepository.getCurrentUserId()
     }
 
     fun getUser(userId: String) {
