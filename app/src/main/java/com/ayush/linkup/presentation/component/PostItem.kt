@@ -1,6 +1,7 @@
 package com.ayush.linkup.presentation.component
 
-import androidx.compose.foundation.clickable
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -57,10 +60,18 @@ import kotlinx.coroutines.launch
 fun PostItem(
     post: Post,
     currentUserId: String?,
-    onDeleteClick: (Post) -> Unit
+    onDeleteClick: (Post) -> Unit,
+    onCommentsClick: (Post) -> Unit,
+    onShareClick: (Post) -> Unit,
+    onLikeClick: (Post, Boolean) -> Unit
 ) {
     val isLiked = rememberSaveable {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(isLiked.value) {
+        Log.d("effect", "Launched Effect executing ${isLiked.value}")
+        onLikeClick(post, !isLiked.value)
     }
 
     val ctx = LocalContext.current
@@ -240,9 +251,8 @@ fun PostItem(
                         contentDescription = "Post",
                     )
                 }
+                Space(20.dp)
             }
-
-            Space(20.dp)
 
             Text(
                 text = post.text,
@@ -259,30 +269,79 @@ fun PostItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.heart),
-                    contentDescription = "heart",
-                    modifier = Modifier.clickable {
-                        isLiked.value = !isLiked.value
+                Column(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .background(Color.Transparent),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(
+                        onClick = {
+                            isLiked.value = !isLiked.value
+                        },
+                        modifier = Modifier.size(30.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.Transparent,
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.heart),
+                            contentDescription = "heart",
+                            tint = if (isLiked.value) Color.Red else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Space(2.dp)
+                    Text(
+                        text = post.likedBy.size.toString(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Column(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .background(Color.Transparent),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(
+                        onClick = {
+                            onCommentsClick(post)
+                        },
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.comments),
+                            contentDescription = "comment",
+                        )
+                    }
+                    Space(2.dp)
+                    Text(
+                        text = post.comments.size.toString(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                IconButton(
+                    onClick = {
+                        onShareClick(post)
                     },
-                    tint = if (isLiked.value) Color.Red else MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.comments),
-                    contentDescription = "comment",
-                    modifier = Modifier.clickable {
-
-                    }
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.share),
-                    contentDescription = "share",
-                    modifier = Modifier.clickable {
-
-                    }
-                )
+                    modifier = Modifier.size(30.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.share),
+                        contentDescription = "share",
+                    )
+                }
                 Spacer(modifier = Modifier.width(10.dp))
             }
             Space(10.dp)

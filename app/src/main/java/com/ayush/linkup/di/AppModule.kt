@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.ayush.linkup.data.repository.AuthRepository
+import com.ayush.linkup.data.repository.DataStoreRepository
 import com.ayush.linkup.data.repository.PostRepository
 import com.ayush.linkup.data.repository.UserRepository
 import com.ayush.linkup.data.repository.impl.AuthRepositoryImpl
+import com.ayush.linkup.data.repository.impl.DataStoreRepositoryImpl
 import com.ayush.linkup.data.repository.impl.PostRepositoryImpl
 import com.ayush.linkup.data.repository.impl.UserRepositoryImpl
 import com.ayush.linkup.utils.NetworkObserver
@@ -51,15 +53,22 @@ object AppModule {
     fun providesPostsRepository(
         firestore: FirebaseFirestore,
         auth: FirebaseAuth,
-        storage: FirebaseStorage
+        storage: FirebaseStorage,
+        @ApplicationContext context: Context
     ): PostRepository = PostRepositoryImpl(
         auth = auth,
         firestore = firestore,
-        storage = storage
+        storage = storage,
+        context = context
     )
 
     @Provides
     fun providesUserRepository(firestore: FirebaseFirestore, auth: FirebaseAuth): UserRepository =
         UserRepositoryImpl(firestore = firestore, auth = auth)
+
+    @Provides
+    fun providesDataStoreRepository(
+        @ApplicationContext context: Context
+    ): DataStoreRepository = DataStoreRepositoryImpl(context)
 
 }

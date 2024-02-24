@@ -1,8 +1,10 @@
 package com.ayush.linkup.presentation.screen.host
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddCircle
@@ -93,6 +95,8 @@ fun RowScope.AddItem(
     navHostController: NavController
 ) {
 
+    val iconAnim = animateDpAsState(targetValue = 40.dp, label = "iconAnim")
+
     val isSelected = currentDestination?.hierarchy?.any {
         it.route == screen.route
     } == true
@@ -124,6 +128,7 @@ fun RowScope.AddItem(
             selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             unselectedIconColor = Color.White
         ),
-        alwaysShowLabel = false
+        alwaysShowLabel = false,
+        modifier = Modifier.size(iconAnim.value)
     )
 }

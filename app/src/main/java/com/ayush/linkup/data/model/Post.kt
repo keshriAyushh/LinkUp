@@ -8,8 +8,9 @@ data class Post(
     val postedAt: Long = 0L,
     val uniqueMediaName: String = "",
     val downloadUrl: String = "",
-    var isLiked: Boolean = false,
+    val likedBy: List<String> = emptyList(),
     val postedByPfp: String = "",
     val postedByName: String = "",
-    val mediaFileName: String = ""
+    val mediaFileName: String = "",
+    val comments: List<Comment> = emptyList()
 )

@@ -6,6 +6,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
@@ -30,7 +32,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -42,7 +46,6 @@ import coil.compose.AsyncImage
 import com.ayush.linkup.R
 import com.ayush.linkup.data.model.Post
 import com.ayush.linkup.presentation.LocalSnackbarState
-import com.ayush.linkup.presentation.component.Loading
 import com.ayush.linkup.presentation.component.Space
 import com.ayush.linkup.presentation.navigation.LocalAppNavigator
 import com.ayush.linkup.presentation.viewmodels.PostsViewModel
@@ -63,6 +66,10 @@ fun AddPostScreen(
         mutableStateOf<Uri?>(null)
     }
 
+    val isUploading = rememberSaveable {
+        mutableStateOf(false)
+    }
+
     val mediaPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
@@ -73,6 +80,10 @@ fun AddPostScreen(
     val snackbarState = LocalSnackbarState.current
     val scope = rememberCoroutineScope()
     val navigator = LocalAppNavigator.current
+
+    if (isUploading.value) {
+        Uploading()
+    }
 
     viewModel.addPostState.collectAsState().value.let {
         when (it) {
@@ -87,12 +98,15 @@ fun AddPostScreen(
             }
 
             State.Loading -> {
-                Loading()
+                isUploading.value = true
             }
 
-            State.None -> {}
+            State.None -> {
+                isUploading.value = false
+            }
 
             is State.Success -> {
+                isUploading.value = false
                 if (it.data) {
                     scope.launch {
                         snackbarState
@@ -213,6 +227,7 @@ fun AddPostScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 Button(
                     onClick = {
+                        isUploading.value = true
                         if ((postText.value.isNotBlank() || postText.value.isNotEmpty())) {
                             if (mediaUri.value != null) {
                                 viewModel.addPost(
@@ -253,5 +268,29 @@ fun AddPostScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun Uploading() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.onSurface)
+            .alpha(0.4f),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            strokeCap = StrokeCap.Round,
+            strokeWidth = 10.dp,
+            modifier = Modifier.size(100.dp),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "Uploading",
+            color = MaterialTheme.colorScheme.onSurface,
+            fontFamily = FontFamily(Font(R.font.nunito_medium)),
+            fontSize = 18.sp
+        )
     }
 }

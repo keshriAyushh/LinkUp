@@ -9,4 +9,6 @@ interface PostRepository {
     fun getPost(postId: String): Flow<State<Post>>
     fun getAllPosts(): Flow<State<List<Post>>>
     fun deletePost(post: Post): Flow<State<Boolean>>
+
+    fun updateLike(post: Post, liked: Boolean)
 }

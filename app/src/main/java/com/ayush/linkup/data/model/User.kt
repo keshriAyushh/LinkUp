@@ -11,5 +11,6 @@ data class User(
     val password: String = "",
     val noOfFriends: Int = 0,
     val friends: String = "",
-    val userName: String = ""
+    val userName: String = "",
+    val likedPosts: List<String> = emptyList()
 )

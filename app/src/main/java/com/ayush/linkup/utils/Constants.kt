@@ -3,6 +3,8 @@ package com.ayush.linkup.utils
 object Constants {
     const val USER_COLLECTION: String = "users"
     const val POST_COLLECTION: String = "posts"
+    const val LIKED_COLLECTION: String = "liked"
+    const val COMPRESSION_QUALITY: Int = 60
     const val ERR: String = "An unknown error has occurred!"
     const val AVAILABLE: String = "Back Online!"
     const val UNAVAILABLE: String = "No internet connection!"

@@ -31,10 +31,7 @@ import com.ayush.linkup.utils.State
 import kotlinx.coroutines.launch
 
 @Composable
-fun PostsScreen(
-    viewModel: PostsViewModel = hiltViewModel()
-) {
-
+fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
     val navigator = LocalAppNavigator.current
     val scope = rememberCoroutineScope()
     val snackbarState = LocalSnackbarState.current
@@ -51,18 +48,16 @@ fun PostsScreen(
                     snackbarState
                         .showSnackbar(
                             message = it.message,
-                            duration = SnackbarDuration.Short
+                            duration = SnackbarDuration.Short,
                         )
                 }
             }
 
             State.Loading -> {
-
             }
 
             State.None -> {}
             is State.Success -> {
-
             }
         }
     }
@@ -74,7 +69,7 @@ fun PostsScreen(
                     snackbarState
                         .showSnackbar(
                             message = it.message,
-                            duration = SnackbarDuration.Short
+                            duration = SnackbarDuration.Short,
                         )
                 }
             }
@@ -84,37 +79,48 @@ fun PostsScreen(
             }
 
             State.None -> {
-
             }
 
             is State.Success -> {
                 LazyColumn(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize(1f)
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(10.dp)
                         .padding(bottom = 85.dp),
                     verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     item {
                         Text(
                             text = "All Posts",
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 25.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_bold))
+                            fontFamily = FontFamily(Font(R.font.nunito_bold)),
                         )
                     }
                     items(it.data) { post ->
-                        PostItem(post = post, currentUserId = currentUserId) { deletePost ->
-                            viewModel.deletePost(deletePost)
-                        }
+                        PostItem(
+                            post = post,
+                            currentUserId = currentUserId,
+                            onDeleteClick = { deletedPost ->
+                                viewModel.deletePost(deletedPost)
+                            },
+                            onLikeClick = { likedPost, liked ->
+                                viewModel.updateLike(likedPost, liked)
+                            },
+                            onShareClick = { sharedPost ->
+
+                            },
+                            onCommentsClick = { commentPost ->
+
+                            }
+                        )
                         Space(10.dp)
                     }
                 }
             }
         }
     }
-
-
 }

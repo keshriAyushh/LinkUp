@@ -83,4 +83,8 @@ class PostsViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateLike(post: Post, liked: Boolean) {
+        postsRepository.updateLike(post, liked)
+    }
 }
