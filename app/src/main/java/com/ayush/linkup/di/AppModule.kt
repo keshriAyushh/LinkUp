@@ -4,10 +4,12 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.ayush.linkup.data.repository.AuthRepository
+import com.ayush.linkup.data.repository.CommentRepository
 import com.ayush.linkup.data.repository.DataStoreRepository
 import com.ayush.linkup.data.repository.PostRepository
 import com.ayush.linkup.data.repository.UserRepository
 import com.ayush.linkup.data.repository.impl.AuthRepositoryImpl
+import com.ayush.linkup.data.repository.impl.CommentRepositoryImpl
 import com.ayush.linkup.data.repository.impl.DataStoreRepositoryImpl
 import com.ayush.linkup.data.repository.impl.PostRepositoryImpl
 import com.ayush.linkup.data.repository.impl.UserRepositoryImpl
@@ -70,5 +72,11 @@ object AppModule {
     fun providesDataStoreRepository(
         @ApplicationContext context: Context
     ): DataStoreRepository = DataStoreRepositoryImpl(context)
+
+    @Provides
+    fun providesCommentRepository(
+        auth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): CommentRepository = CommentRepositoryImpl(auth, firestore)
 
 }

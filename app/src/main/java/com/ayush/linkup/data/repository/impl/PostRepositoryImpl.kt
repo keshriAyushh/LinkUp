@@ -8,6 +8,7 @@ import com.ayush.linkup.data.model.User
 import com.ayush.linkup.data.repository.PostRepository
 import com.ayush.linkup.data.utils.TaskState
 import com.ayush.linkup.data.utils.toFlow
+import com.ayush.linkup.utils.Constants.COMMENTS_COLLECTION
 import com.ayush.linkup.utils.Constants.ERR
 import com.ayush.linkup.utils.Constants.POST_COLLECTION
 import com.ayush.linkup.utils.Constants.USER_COLLECTION
@@ -79,6 +80,7 @@ class PostRepositoryImpl @Inject constructor(
                         )
                     )
                     .await()
+
             } else {
                 firestore.collection(POST_COLLECTION)
                     .document(postId)
@@ -138,12 +140,10 @@ class PostRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             trySend(State.Error(e.localizedMessage ?: ERR))
         }
-
         awaitClose {
             channel.close()
         }
     }
-
 
     override fun deletePost(post: Post): Flow<State<Boolean>> = flow {
         try {
@@ -156,6 +156,21 @@ class PostRepositoryImpl @Inject constructor(
                     .child("image/${post.postedBy}/${post.mediaFileName}")
                     .delete()
             }
+
+            firestore.collection(POST_COLLECTION)
+                .document(post.postId)
+                .collection(COMMENTS_COLLECTION)
+                .get()
+                .addOnCompleteListener { task ->
+                    for (snapshot in task.result) {
+                        firestore.collection(POST_COLLECTION)
+                            .document(post.postId)
+                            .collection(COMMENTS_COLLECTION)
+                            .document(snapshot.id)
+                            .delete()
+                    }
+                }
+                .await()
 
             firestore.collection(POST_COLLECTION)
                 .document(post.postId)

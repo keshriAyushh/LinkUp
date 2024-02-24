@@ -275,8 +275,8 @@ fun AddPostScreen(
 fun Uploading() {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onSurface)
+            .fillMaxSize(1f)
+            .background(Color.White)
             .alpha(0.4f),
         contentAlignment = Alignment.Center
     ) {

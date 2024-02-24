@@ -1,12 +1,9 @@
 package com.ayush.linkup.presentation.component
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,51 +28,36 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.ayush.linkup.R
-import com.ayush.linkup.data.model.Post
+import com.ayush.linkup.data.model.Comment
 import com.ayush.linkup.presentation.ui.theme.RED
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostItem(
-    post: Post,
-    currentUserId: String?,
-    onDeleteClick: (Post) -> Unit,
-    onCommentsClick: (Post) -> Unit,
-    onShareClick: (Post) -> Unit,
-    onLikeClick: (Post, Boolean) -> Unit
+fun CommentItem(
+    comment: Comment,
+    currentUserId: String,
+    postOwnerId: String,
+    onDeleteClick: (Comment) -> Unit
 ) {
-    val isLiked = rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    LaunchedEffect(isLiked.value) {
-        Log.d("effect", "Launched Effect executing ${isLiked.value}")
-        onLikeClick(post, !isLiked.value)
-    }
 
     val ctx = LocalContext.current
-
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val showBottomSheet = remember { mutableStateOf(false) }
@@ -88,7 +70,7 @@ fun PostItem(
             sheetState = sheetState
         ) {
             Text(
-                text = "Delete Post",
+                text = "Delete Comment",
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 fontFamily = FontFamily(Font(R.font.nunito_bold)),
                 fontSize = 20.sp
@@ -97,7 +79,7 @@ fun PostItem(
             Space(20.dp)
 
             Text(
-                text = "Are you sure you want to delete your post? ",
+                text = "Are you sure you want to delete your comment? ",
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 fontFamily = FontFamily(Font(R.font.nunito_bold)),
                 fontSize = 16.sp
@@ -142,7 +124,7 @@ fun PostItem(
                                 showBottomSheet.value = false
                             }
                         }
-                        onDeleteClick(post)
+                        onDeleteClick(comment)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = RED,
@@ -191,10 +173,10 @@ fun PostItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    if (post.postedByPfp != "") {
+                    if (comment.userPfp != "") {
                         AsyncImage(
                             model = ImageRequest.Builder(ctx)
-                                .data(post.postedByPfp)
+                                .data(comment.userPfp)
                                 .crossfade(true)
                                 .build(),
                             contentDescription = null,
@@ -213,13 +195,13 @@ fun PostItem(
 
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = post.postedByName,
+                        text = comment.userName,
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_bold)),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
-                if (post.postedBy == currentUserId) {
+                if (comment.commentedBy == currentUserId || postOwnerId == currentUserId) {
                     IconButton(
                         onClick = {
                             showBottomSheet.value = true
@@ -238,113 +220,14 @@ fun PostItem(
                 }
 
             }
-
             Space(20.dp)
-
-            if (post.media != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(1f),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    AsyncImage(
-                        model = post.media,
-                        contentDescription = "Post",
-                    )
-                }
-                Space(20.dp)
-            }
-
             Text(
-                text = post.text,
+                text = comment.comment,
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 color = MaterialTheme.colorScheme.onSurface
             )
-
             Space(20.dp)
-            Row(
-                modifier = Modifier
-                    .fillMaxSize(1f)
-                    .padding(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .background(Color.Transparent),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(
-                        onClick = {
-                            isLiked.value = !isLiked.value
-                        },
-                        modifier = Modifier.size(30.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.Transparent,
-                        )
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.heart),
-                            contentDescription = "heart",
-                            tint = if (isLiked.value) Color.Red else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    Space(2.dp)
-                    Text(
-                        text = post.likedBy.size.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(modifier = Modifier.width(20.dp))
-                Column(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .background(Color.Transparent),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    IconButton(
-                        onClick = {
-                            onCommentsClick(post)
-                        },
-                        modifier = Modifier.size(30.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.comments),
-                            contentDescription = "comment",
-                        )
-                    }
-                    Space(2.dp)
-                    Text(
-                        text = post.comments.toString(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                IconButton(
-                    onClick = {
-                        onShareClick(post)
-                    },
-                    modifier = Modifier.size(30.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.share),
-                        contentDescription = "share",
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-            }
-            Space(10.dp)
         }
     }
 }

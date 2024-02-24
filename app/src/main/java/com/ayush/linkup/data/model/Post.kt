@@ -12,5 +12,5 @@ data class Post(
     val postedByPfp: String = "",
     val postedByName: String = "",
     val mediaFileName: String = "",
-    val comments: List<Comment> = emptyList()
+    val comments: Int = 0
 )
