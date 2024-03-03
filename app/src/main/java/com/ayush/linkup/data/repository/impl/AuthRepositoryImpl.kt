@@ -77,7 +77,13 @@ class AuthRepositoryImpl @Inject constructor(
                 val userId = auth.currentUser?.uid!!
                 firestore.collection(USER_COLLECTION)
                     .document(userId)
-                    .set(user.copy(timestamp = System.currentTimeMillis(), userId = userId))
+                    .set(
+                        user.copy(
+                            timestamp = System.currentTimeMillis(),
+                            userId = userId,
+                            posts = emptyList()
+                        )
+                    )
                     .toFlow()
                     .collect {
                         when(it) {

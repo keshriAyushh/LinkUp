@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ayush.linkup.R
 import com.ayush.linkup.presentation.component.AnimatedButton
+import com.ayush.linkup.presentation.component.Space
 import com.ayush.linkup.presentation.navigation.LocalAuthNavigator
 import com.ayush.linkup.presentation.viewmodels.OnboardingViewModel
 import com.ayush.linkup.utils.Route
@@ -58,6 +59,7 @@ fun OnboardingScreen(
         OnboardingPage.First,
         OnboardingPage.Second,
         OnboardingPage.Third,
+        OnboardingPage.Fourth,
     )
 
     val pagerState = rememberPagerState()
@@ -68,9 +70,10 @@ fun OnboardingScreen(
 
     val animatePb = animateFloatAsState(
         targetValue = when (pagerState.currentPage) {
-            0 -> 0.33f
-            1 -> 0.66f
-            else -> 0.33f
+            0 -> 0.25f
+            1 -> 0.50f
+            2 -> 0.75f
+            else -> 0.25f
         },
         label = "progressBar animation",
         finishedListener = {
@@ -87,14 +90,14 @@ fun OnboardingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.8f),
-            count = 3,
+            count = 4,
             state = pagerState,
             verticalAlignment = Alignment.Top
         ) { position ->
             PagerScreen(onboardingPage = pages[position])
         }
 
-        if (pagerState.currentPage < 2) {
+        if (pagerState.currentPage != 3) {
             Box(
                 modifier = Modifier
                     .wrapContentSize()
@@ -112,7 +115,7 @@ fun OnboardingScreen(
                 )
                 FilledIconButton(
                     onClick = {
-                        if (pagerState.currentPage != 2) {
+                        if (pagerState.currentPage < 3) {
                             scope.launch {
                                 pagerState.scrollToPage(pagerState.currentPage + 1)
                             }
@@ -134,8 +137,7 @@ fun OnboardingScreen(
                 }
             }
 
-        }
-        if (isFinishVisible.value) {
+        } else {
             AnimatedButton(
                 pagerState = pagerState,
                 text = "Finish",
@@ -148,6 +150,7 @@ fun OnboardingScreen(
                 navigator.navigate(Route.SignupScreen.route)
             }
         }
+
     }
 }
 
@@ -159,15 +162,7 @@ fun PagerScreen(onboardingPage: OnboardingPage) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        if (onboardingPage.image != null) {
-            Image(
-                painter = painterResource(id = onboardingPage.image),
-                contentDescription = "pager image",
-                modifier = Modifier
-                    .fillMaxWidth(0.5f)
-                    .fillMaxHeight(0.7f)
-            )
-        }
+        Space(100.dp)
         Text(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -178,6 +173,16 @@ fun PagerScreen(onboardingPage: OnboardingPage) {
             fontFamily = FontFamily(Font(R.font.nunito_bold)),
             color = MaterialTheme.colorScheme.onSurface
         )
+        Space(20.dp)
+        if (onboardingPage.image != null) {
+            Image(
+                painter = painterResource(id = onboardingPage.image),
+                contentDescription = "pager image",
+                modifier = Modifier
+                    .size(300.dp)
+            )
+        }
+
         Text(
             modifier = Modifier
                 .fillMaxWidth()

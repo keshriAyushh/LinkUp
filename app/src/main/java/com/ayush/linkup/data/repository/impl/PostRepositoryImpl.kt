@@ -44,10 +44,12 @@ class PostRepositoryImpl @Inject constructor(
             emit(State.None)
             emit(State.Loading)
 
+            val userId = auth.currentUser?.uid!!
+
             val postId = firestore.collection(POST_COLLECTION).document().id
 
             val currentUser = firestore.collection(USER_COLLECTION)
-                .document(auth.currentUser?.uid!!)
+                .document(userId)
                 .get()
                 .await()
                 .toObject(User::class.java) ?: User()
@@ -55,7 +57,7 @@ class PostRepositoryImpl @Inject constructor(
             val randomFileName = UUID.randomUUID().toString().split("-")[0].trim()
             if (post.media != null) {
 
-                val uploadTask = storage.reference.child("image/${post.postedBy}/$randomFileName")
+                storage.reference.child("image/${post.postedBy}/$randomFileName")
                     .putBytes(Decompressor.compress(Uri.parse(post.media), context))
                     .await()
 
@@ -80,7 +82,6 @@ class PostRepositoryImpl @Inject constructor(
                         )
                     )
                     .await()
-
             } else {
                 firestore.collection(POST_COLLECTION)
                     .document(postId)
@@ -95,6 +96,10 @@ class PostRepositoryImpl @Inject constructor(
                     )
                     .await()
             }
+            firestore.collection(USER_COLLECTION)
+                .document(userId)
+                .update("posts", FieldValue.arrayUnion(postId))
+                .await()
 
             emit(State.Success(true))
         } catch (e: Exception) {
@@ -224,6 +229,37 @@ class PostRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             Log.d("update error", e.localizedMessage ?: ERR)
+        }
+    }
+
+    override fun getAllPostsByUserId(userId: String): Flow<State<List<Post>>> = callbackFlow {
+        try {
+            trySend(State.None)
+            trySend(State.Loading)
+
+            firestore.collection(POST_COLLECTION)
+                .orderBy("postedAt", Query.Direction.DESCENDING)
+                .addSnapshotListener { value, error ->
+                    error?.let {
+                        this.trySend(State.Error(error.localizedMessage ?: ERR))
+                        this.close(it)
+                    }
+                    value?.let {
+                        val posts = it.toObjects(Post::class.java)
+                        val userPosts = mutableListOf<Post>()
+                        posts.forEach { post ->
+                            if (post.postedBy == userId) {
+                                userPosts.add(post)
+                            }
+                        }
+                        this.trySend(State.Success(userPosts))
+                    }
+                }
+        } catch (e: Exception) {
+            trySend(State.Error(e.localizedMessage ?: ERR))
+        }
+        awaitClose {
+            channel.close()
         }
     }
 }

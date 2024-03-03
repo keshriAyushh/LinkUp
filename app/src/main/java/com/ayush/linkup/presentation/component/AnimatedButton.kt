@@ -38,7 +38,7 @@ fun AnimatedButton(
     ) {
         AnimatedVisibility(
             modifier = Modifier.fillMaxWidth(),
-            visible = pagerState.currentPage == 2
+            visible = pagerState.currentPage == 3
         ) {
             Button(
                 onClick = onClick,

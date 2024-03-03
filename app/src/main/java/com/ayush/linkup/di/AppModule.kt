@@ -65,8 +65,12 @@ object AppModule {
     )
 
     @Provides
-    fun providesUserRepository(firestore: FirebaseFirestore, auth: FirebaseAuth): UserRepository =
-        UserRepositoryImpl(firestore = firestore, auth = auth)
+    fun providesUserRepository(
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth,
+        storage: FirebaseStorage
+    ): UserRepository =
+        UserRepositoryImpl(firestore = firestore, auth = auth, storage = storage)
 
     @Provides
     fun providesDataStoreRepository(

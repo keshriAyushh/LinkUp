@@ -86,6 +86,7 @@ fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
         viewModel.getAllPosts()
     }
 
+
     if (showBottomSheet.value) {
         ModalBottomSheet(
             onDismissRequest = {

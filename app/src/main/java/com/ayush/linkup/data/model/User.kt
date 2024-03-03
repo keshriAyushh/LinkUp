@@ -1,5 +1,8 @@
 package com.ayush.linkup.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class User(
     val userId: String = "",
     val name: String = "",
@@ -12,5 +15,6 @@ data class User(
     val noOfFriends: Int = 0,
     val friends: String = "",
     val userName: String = "",
-    val likedPosts: List<String> = emptyList()
+    val likedPosts: List<String> = emptyList(),
+    val posts: List<String> = emptyList()
 )

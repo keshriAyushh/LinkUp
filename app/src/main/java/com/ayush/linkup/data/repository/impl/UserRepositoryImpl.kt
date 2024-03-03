@@ -7,16 +7,22 @@ import com.ayush.linkup.utils.Constants.USER_COLLECTION
 import com.ayush.linkup.utils.State
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val storage: FirebaseStorage
 ) : UserRepository {
 
     override fun getCurrentUserId(): String? {
@@ -46,6 +52,25 @@ class UserRepositoryImpl @Inject constructor(
 
         awaitClose {
             channel.close()
+        }
+    }
+
+    override fun deleteUser(userId: String) {
+        try {
+            CoroutineScope(Dispatchers.IO).launch {
+                firestore.collection(USER_COLLECTION)
+                    .document(userId)
+                    .delete()
+                    .await()
+
+                auth.currentUser?.delete()?.await()
+
+                storage.reference.child("image/${userId}")
+                    .delete()
+                    .await()
+            }
+        } catch (e: Exception) {
+
         }
     }
 }
