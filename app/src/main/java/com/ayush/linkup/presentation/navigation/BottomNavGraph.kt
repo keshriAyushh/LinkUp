@@ -1,5 +1,7 @@
 package com.ayush.linkup.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -12,6 +14,7 @@ import androidx.navigation.navArgument
 import com.ayush.linkup.presentation.screen.app.discover.DiscoverScreen
 import com.ayush.linkup.presentation.screen.app.notifications.NotificationScreen
 import com.ayush.linkup.presentation.screen.app.posts.AddPostScreen
+import com.ayush.linkup.presentation.screen.app.posts.LikedPostsScreen
 import com.ayush.linkup.presentation.screen.app.posts.PostsScreen
 import com.ayush.linkup.presentation.screen.app.profile.ProfileScreen
 import com.ayush.linkup.presentation.screen.app.profile.UserProfileScreen
@@ -64,11 +67,72 @@ fun BottomNavGraph(
                     navArgument("currentUserId") {
                         type = NavType.StringType
                     }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                        animationSpec = tween(700)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                        animationSpec = tween(700)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                        animationSpec = tween(700)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                        animationSpec = tween(700)
+                    )
+                }
             ) { backStackEntry ->
                 UserProfileScreen(
                     currentUserId = backStackEntry.arguments?.getString("currentUserId") ?: "null",
                     userId = backStackEntry.arguments?.getString("posterId") ?: "null"
+                )
+            }
+
+            composable(
+                route = "${Route.LikedPostsScreen.route}/{currentUserId}",
+                arguments = listOf(
+                    navArgument("currentUserId") {
+                        type = NavType.StringType
+                    }
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                        animationSpec = tween(700)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Left,
+                        animationSpec = tween(700)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                        animationSpec = tween(700)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Companion.Right,
+                        animationSpec = tween(700)
+                    )
+                }
+            ) { backStackEntry ->
+                LikedPostsScreen(
+                    currentUserId = backStackEntry.arguments?.getString("currentUserId") ?: "null"
                 )
             }
         }

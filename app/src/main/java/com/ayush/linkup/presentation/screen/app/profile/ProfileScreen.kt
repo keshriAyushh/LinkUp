@@ -56,6 +56,7 @@ import com.ayush.linkup.presentation.component.ProfilePostItem
 import com.ayush.linkup.presentation.component.Space
 import com.ayush.linkup.presentation.navigation.LocalAppNavigator
 import com.ayush.linkup.presentation.viewmodels.ProfileViewModel
+import com.ayush.linkup.utils.Route
 import com.ayush.linkup.utils.State
 import kotlinx.coroutines.launch
 
@@ -80,6 +81,7 @@ fun ProfileScreen(
     )
 
     LaunchedEffect(key1 = Unit) {
+        viewModel.getCurrentUserId()
         viewModel.getUserData()
     }
 
@@ -110,7 +112,7 @@ fun ProfileScreen(
 
                 Button(
                     onClick = {
-
+                        navigator.navigate("${Route.LikedPostsScreen.route}/${viewModel.userId}")
                     },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -129,7 +131,7 @@ fun ProfileScreen(
                 }
 
                 Space(10.dp)
-                        
+
                 Button(
                     onClick = {
                         viewModel.signOut()
@@ -280,11 +282,17 @@ fun ProfileScreen(
                     viewModel.postState.collectAsState().value.let {
                         when (it) {
                             is State.Error -> {
-
+                                scope.launch {
+                                    snackbarState
+                                        .showSnackbar(
+                                            message = it.message,
+                                            duration = SnackbarDuration.Short
+                                        )
+                                }
                             }
 
                             State.Loading -> {
-
+                                Loading()
                             }
 
                             State.None -> {

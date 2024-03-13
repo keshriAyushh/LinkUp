@@ -262,4 +262,31 @@ class PostRepositoryImpl @Inject constructor(
             channel.close()
         }
     }
+
+    override fun getAllLikedPosts(userId: String): Flow<State<List<Post>>> = callbackFlow {
+        try {
+            trySend(State.None)
+            trySend(State.Loading)
+
+            firestore.collection(POST_COLLECTION)
+//                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .whereIn("likedBy", listOf(userId))
+                .addSnapshotListener { value, error ->
+                    error?.let {
+                        trySend(State.Error(it.message ?: ERR))
+                        this.close(it)
+                    }
+                    value?.let {
+                        val posts = it.toObjects(Post::class.java)
+                        trySend(State.Success(posts))
+                    }
+                }
+
+        } catch (e: Exception) {
+            trySend(State.Error(e.localizedMessage ?: ERR))
+        }
+        awaitClose {
+            channel.close()
+        }
+    }
 }

@@ -368,6 +368,8 @@ fun UserProfileScreen(
                                         ) { posterId ->
 
                                         }
+
+                                        Space(10.dp)
                                     }
                                 }
                             }
