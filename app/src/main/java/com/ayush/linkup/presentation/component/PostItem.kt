@@ -2,6 +2,7 @@ package com.ayush.linkup.presentation.component
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -63,10 +64,11 @@ fun PostItem(
     onDeleteClick: (Post) -> Unit,
     onCommentsClick: (Post) -> Unit,
     onShareClick: (Post) -> Unit,
-    onLikeClick: (Post, Boolean) -> Unit
+    onLikeClick: (Post, Boolean) -> Unit,
+    onNameClick: (String) -> Unit
 ) {
     val isLiked = rememberSaveable {
-        mutableStateOf(false)
+        mutableStateOf(post.likedBy.contains(currentUserId))
     }
 
     LaunchedEffect(isLiked.value) {
@@ -217,6 +219,9 @@ fun PostItem(
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_bold)),
                         color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.clickable {
+                            onNameClick(post.postedBy)
+                        }
                     )
                 }
                 if (post.postedBy == currentUserId) {

@@ -1,22 +1,30 @@
-package com.ayush.linkup.presentation.screen.app.posts
+package com.ayush.linkup.presentation.screen.app.profile
 
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Send
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -28,13 +36,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
@@ -42,51 +51,51 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.ayush.linkup.R
 import com.ayush.linkup.data.model.Comment
-import com.ayush.linkup.data.model.Post
 import com.ayush.linkup.presentation.LocalSnackbarState
 import com.ayush.linkup.presentation.component.CommentItem
 import com.ayush.linkup.presentation.component.Loading
 import com.ayush.linkup.presentation.component.PostItem
 import com.ayush.linkup.presentation.component.Space
 import com.ayush.linkup.presentation.navigation.LocalAppNavigator
-import com.ayush.linkup.presentation.viewmodels.PostsViewModel
-import com.ayush.linkup.utils.Route
+import com.ayush.linkup.presentation.screen.app.posts.Post
+import com.ayush.linkup.presentation.viewmodels.UserProfileViewModel
 import com.ayush.linkup.utils.State
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
+fun UserProfileScreen(
+    currentUserId: String,
+    userId: String,
+    viewModel: UserProfileViewModel = hiltViewModel()
+) {
 
-    val navigator = LocalAppNavigator.current
     val scope = rememberCoroutineScope()
     val snackbarState = LocalSnackbarState.current
-    val currentUserId = viewModel.currentUserId
 
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    LaunchedEffect(key1 = Unit) {
+        viewModel.getUser(userId)
+        viewModel.getPostsByUserId(userId)
+    }
+
+    val showBottomSheet = rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    val navigator = LocalAppNavigator.current
 
     val commentText = rememberSaveable {
         mutableStateOf("")
     }
 
-    val showBottomSheet = remember { mutableStateOf(false) }
-
     val postId = rememberSaveable {
         mutableStateOf("")
     }
 
-    val postOwner = rememberSaveable {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(true) {
-        viewModel.getAllPosts()
-    }
-
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (showBottomSheet.value) {
         ModalBottomSheet(
@@ -94,8 +103,7 @@ fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
                 showBottomSheet.value = false
             },
             sheetState = bottomSheetState,
-
-            ) {
+        ) {
             LaunchedEffect(key1 = showBottomSheet.value) {
                 if (postId.value != "") {
                     Log.d("postId", postId.value)
@@ -138,8 +146,8 @@ fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
                                 items(it.data) { comment ->
                                     CommentItem(
                                         comment,
-                                        currentUserId!!,
-                                        postOwner.value
+                                        currentUserId,
+                                        userId
                                     ) { deleteComment ->
                                         viewModel.deleteComment(deleteComment)
                                         viewModel.updateComments(value = -1, post = Post)
@@ -209,35 +217,14 @@ fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
         }
     }
 
-    viewModel.deleteState.collectAsState().value.let {
+    viewModel.userState.collectAsState().value.let {
         when (it) {
             is State.Error -> {
                 scope.launch {
                     snackbarState
                         .showSnackbar(
                             message = it.message,
-                            duration = SnackbarDuration.Short,
-                        )
-                }
-            }
-
-            State.Loading -> {
-            }
-
-            State.None -> {}
-            is State.Success -> {
-            }
-        }
-    }
-
-    viewModel.allPostsState.collectAsState().value.let {
-        when (it) {
-            is State.Error -> {
-                scope.launch {
-                    snackbarState
-                        .showSnackbar(
-                            message = it.message,
-                            duration = SnackbarDuration.Short,
+                            duration = SnackbarDuration.Short
                         )
                 }
             }
@@ -246,52 +233,145 @@ fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
                 Loading()
             }
 
-            State.None -> {
-            }
+            State.None -> {}
 
             is State.Success -> {
-                LazyColumn(
-                    modifier =
-                    Modifier
-                        .fillMaxSize(1f)
+                val user = it.data
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(10.dp)
-                        .padding(bottom = 85.dp),
+                        .padding(10.dp),
                     verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.Start,
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    item {
-                        Text(
-                            text = "All Posts",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 25.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(1f)
+                            .padding(horizontal = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(
+                            onClick = {
+                                navigator.popBackStack()
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.ArrowBack,
+                                contentDescription = "back_button",
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                //Do something, idk
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.add_friend),
+                                contentDescription = "back_button",
+                            )
+                        }
+                    }
+
+                    Space(50.dp)
+
+                    if (user.pfp != "") {
+                        AsyncImage(
+                            model = user.pfp,
+                            contentDescription = "profile_photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .size(70.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.AccountCircle,
+                            contentDescription = "dp",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .size(70.dp)
                         )
                     }
-                    items(it.data) { post ->
-                        PostItem(
-                            post = post,
-                            currentUserId = currentUserId,
-                            onDeleteClick = { deletedPost ->
-                                viewModel.deletePost(deletedPost)
-                            },
-                            onLikeClick = { likedPost, liked ->
-                                viewModel.updateLike(likedPost, liked)
 
-                            },
-                            onShareClick = { sharedPost ->
+                    Space(10.dp)
+                    Text(
+                        text = user.name,
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 20.sp,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    Space(20.dp)
+                    Text(
+                        text = "All Posts",
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 20.sp,
+                    )
 
-                            },
-                            onCommentsClick = { commentPost ->
-                                postId.value = commentPost.postId
-                                showBottomSheet.value = true
-                                postOwner.value = commentPost.postedBy
-                                Post = commentPost
+                    viewModel.postsState.collectAsState().value.let {
+                        when (it) {
+                            is State.Error -> {
+                                scope.launch {
+                                    snackbarState.showSnackbar(
+                                        message = it.message,
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
-                        ) { posterId ->
-                            navigator.navigate("${Route.UserProfileScreen.route}/${posterId}/${currentUserId}")
+
+                            State.Loading -> {
+                                Loading()
+                            }
+
+                            State.None -> {
+
+                            }
+
+                            is State.Success -> {
+                                val posts = it.data
+                                LazyColumn {
+                                    items(posts) { post ->
+                                        PostItem(
+                                            post = post,
+                                            currentUserId = currentUserId,
+                                            onDeleteClick = { deletePost ->
+                                                if (currentUserId == post.postedBy) {
+
+                                                }
+                                            },
+                                            onCommentsClick = { commentPost ->
+                                                postId.value = commentPost.postId
+                                                showBottomSheet.value = true
+                                            },
+                                            onShareClick = {
+
+                                            },
+                                            onLikeClick = { likedPost, isLiked ->
+                                                viewModel.updateLike(likedPost, isLiked)
+                                            },
+                                        ) { posterId ->
+
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        Space(10.dp)
                     }
                 }
             }
@@ -299,4 +379,4 @@ fun PostsScreen(viewModel: PostsViewModel = hiltViewModel()) {
     }
 }
 
-var Post = Post()
+var post = com.ayush.linkup.data.model.Post()

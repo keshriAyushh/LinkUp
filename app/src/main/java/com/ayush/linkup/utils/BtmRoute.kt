@@ -15,10 +15,10 @@ sealed class BtmRoute(
         title = "Posts"
     )
 
-    data object SearchScreen : BtmRoute(
-        route = "search",
+    data object DiscoverScreen : BtmRoute(
+        route = "discover",
         icon = R.drawable.search,
-        title = "Search"
+        title = "Discover"
     )
 
     data object AddPostScreen : BtmRoute(

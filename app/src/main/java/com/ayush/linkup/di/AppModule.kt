@@ -6,11 +6,13 @@ import androidx.annotation.RequiresApi
 import com.ayush.linkup.data.repository.AuthRepository
 import com.ayush.linkup.data.repository.CommentRepository
 import com.ayush.linkup.data.repository.DataStoreRepository
+import com.ayush.linkup.data.repository.DiscoverRepository
 import com.ayush.linkup.data.repository.PostRepository
 import com.ayush.linkup.data.repository.UserRepository
 import com.ayush.linkup.data.repository.impl.AuthRepositoryImpl
 import com.ayush.linkup.data.repository.impl.CommentRepositoryImpl
 import com.ayush.linkup.data.repository.impl.DataStoreRepositoryImpl
+import com.ayush.linkup.data.repository.impl.DiscoverRepositoryImpl
 import com.ayush.linkup.data.repository.impl.PostRepositoryImpl
 import com.ayush.linkup.data.repository.impl.UserRepositoryImpl
 import com.ayush.linkup.utils.NetworkObserver
@@ -82,5 +84,11 @@ object AppModule {
         auth: FirebaseAuth,
         firestore: FirebaseFirestore
     ): CommentRepository = CommentRepositoryImpl(auth, firestore)
+
+    @Provides
+    fun providesDiscoverRepository(
+        auth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): DiscoverRepository = DiscoverRepositoryImpl(auth, firestore)
 
 }

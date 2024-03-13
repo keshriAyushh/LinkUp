@@ -62,7 +62,7 @@ fun HostScreen() {
 fun BottomBar(navController: NavController) {
     val screens = listOf(
         BtmRoute.PostsScreen,
-        BtmRoute.SearchScreen,
+        BtmRoute.DiscoverScreen,
         BtmRoute.AddPostScreen,
         BtmRoute.NotificationsScreen,
         BtmRoute.ProfileScreen

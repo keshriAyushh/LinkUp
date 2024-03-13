@@ -56,7 +56,6 @@ import com.ayush.linkup.presentation.component.ProfilePostItem
 import com.ayush.linkup.presentation.component.Space
 import com.ayush.linkup.presentation.navigation.LocalAppNavigator
 import com.ayush.linkup.presentation.viewmodels.ProfileViewModel
-import com.ayush.linkup.utils.Route
 import com.ayush.linkup.utils.State
 import kotlinx.coroutines.launch
 
@@ -108,13 +107,37 @@ fun ProfileScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
                 Space(10.dp)
+
                 Button(
                     onClick = {
-                        viewModel.signOut()
+
                     },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                        containerColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .padding(horizontal = 10.dp),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(
+                        text = "Liked Posts",
+                        fontSize = 18.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    )
+                }
+
+                Space(10.dp)
+                        
+                Button(
+                    onClick = {
+                        viewModel.signOut()
+                        onSignOutClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        containerColor = MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier
                         .fillMaxWidth(1f)
@@ -131,7 +154,7 @@ fun ProfileScreen(
                 Button(
                     onClick = {
                         viewModel.deleteAccount()
-                        navigator.navigate(Route.HostScreen.route)
+                        onSignOutClick()
                     },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = MaterialTheme.colorScheme.onError,
@@ -151,9 +174,6 @@ fun ProfileScreen(
             }
         }
     }
-
-
-
     viewModel.userState.collectAsState().value.let {
         when (it) {
             is State.Error -> {
